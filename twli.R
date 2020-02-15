@@ -247,7 +247,8 @@ if (file_year > year_range[1] & file_year < year_range[length(year_range)]) {
     
     if (merge_done == "FALSE") {
       
-      chk_row <- data.frame(year = doc_year, mode = c("s", "vbox"), mult = "0", stringsAsFactors = FALSE) %>%
+      chk_row <- data.frame(year = doc_year, mode = "s", mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = file_year, mode = "m", mult = "1", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = file_year, mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = file_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -256,12 +257,7 @@ if (file_year > year_range[1] & file_year < year_range[length(year_range)]) {
       
     }
     
-  } else {
-    
-    doc_year <- pre_year
-    
-  }
-  
+}
   
   
  
@@ -272,6 +268,7 @@ merge_list <- list()
 
 for (chk in 1:nrow(chk_row)) {
   
+  #chk = 6
   mode_chk <- as.character(chk_row$mode[chk])
   #done_chk <- as.character(chk_row$done[chk])
   
@@ -285,44 +282,15 @@ for (chk in 1:nrow(chk_row)) {
     merge_chk <- merge_temp %>%
       filter(!!sym(paste0("mode_", chk_row$year[chk])) == mode_chk)
     
-      merge_chk <- merge_chk %>%
-        filter(grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
-      
-      
-      
-  #if(is.na(done_chk) == TRUE) {
-        
-        
-        
-   # } else {
-      
-      merge_chk <- merge_chk %>%
-        filter(!!sym(paste0("done_", chk_row$year[chk])) == done_chk)
-      
-      merge_chk <- merge_chk %>%
-        filter(!!sym(paste0("done_", chk_row$year[chk])) == done_chk & grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
-      
-      reverse_chk <- case_when(mode_chk == "m" ~ "s",
-                               mode_chk == "s" ~ "m")  
-      
-      test <- merge_chk %>%
-        filter(case_when(chk_row$mult[chk] == "0" ~ !!sym(paste0("done_", chk_row$year[chk])) == done_chk),
-                         TRUE ~ !!sym(paste0("done_", chk_row$year[chk])) == done_chk & grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
-      
-  
-merge_chk %>% grepl(!!sym(chk_row$year[chk]), !!sym(chk_row$year[chk]) == reverse_chk)
-
-grepl(paste(merge_chk$`2014`, collapse = "|"), merge_temp$`2014`[merge_temp$mode_2014 == reverse_chk])
-        
-      
-   # }
+      #merge_chk <- merge_chk %>%
+      #  filter(grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
     
   }
   
   if(nrow(merge_chk) > 0) {
     
     merge_chk$year <- chk_row$year[chk]
-    
+  
   }
   
   merge_list <- bind_rows(merge_list, merge_chk)
@@ -333,6 +301,8 @@ merge_gp <- list()
 ignore_row <- list()
 
 for (gp in 1:nrow(merge_list)) {
+  
+  gp <- 1 
   
   if (gp %in% ignore_row) {
     
