@@ -21,22 +21,24 @@ library(htmlwidgets)
 
 options(warn = -1)
 
-#setwd('D:/Users/Torrent/Google 雲端硬碟/stat/R/twli')
-setwd('/media/torrent/Database/Users/torrent/Google 雲端硬碟/stat/R/twli')
-setwd("/media/torrent/Database/User/Google 雲端硬碟/stat/R/twli")
-setwd("~/Google Drive File Stream/我的雲端硬碟/stat/R/twli")
+#setwd('D:/Users/Torrent/Google 雲端硬碟/stat/R/github/twli')
+setwd('/media/torrent/Database/Users/torrent/Google 雲端硬碟/stat/R/github/twli')
+setwd("/media/torrent/Database/User/Google 雲端硬碟/stat/R/github/twli")
+setwd("~/Google Drive File Stream/我的雲端硬碟/stat/R/github/twli")
 
-result_2009_ty <- read_xlsx("result_2009_ty.xlsx")
-result_2010_kc <- read_xlsx("result_2010_kc.xlsx")
-result_2014_kyc <- read_xlsx("result_2014_kyc.xlsx")
-result_2018_kyc <- read_xlsx("result_2018_kyc.xlsx")
+result_2009_ty <- read_xlsx("data/result_2009_ty.xlsx")
+result_2010_kc <- read_xlsx("data/result_2010_kc.xlsx")
+result_2014_kyc <- read_xlsx("data/result_2014_kyc.xlsx")
+result_2018_kyc <- read_xlsx("data/result_2018_kyc.xlsx")
 
 
-li_table <- read_xlsx("li_table.xlsx", sheet = "Sheet1", col_types = "text")
+li_table <- read_xlsx("data/li_table.xlsx", sheet = "Sheet1", col_types = "text")
 
 year_range <- c("2009", "2018")
 
 file_year <- "2014"
+
+merge_done <- c("TRUE")
 
 #村里合併表格函數
 
@@ -167,40 +169,51 @@ year_range <- unique(c(year_range[1],  year[year %in% year_range], year_range[le
 
 merge_temp <- dplyr::select(li_table, c(1:7), contains(year_range))
 
-merge_temp <- merge_temp[rowSums(is.na(merge_temp[,year_range])) != length(year_range),]
+merge_temp <- merge_temp[rowSums(is.na(merge_temp[, year])) != length(year),]
 
 #不同年度所需各種整併情況
 
 if (file_year == year_range[1]) { #檔案年度為資料處理範圍第一年
   
-  chk_row <- matrix(c(
-    year_range[1], "m", NA,
-    year_range[1], "vbox", NA,
-    year_range[length(year_range)], "m", NA, 
-    year_range[length(year_range)], "vbox", NA), ncol = 3, byrow = TRUE)
+  if (merge_done == "TRUE") { 
+    
+    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+  } 
   
-  chk_row <- as.data.frame(chk_row)
-  
-  colnames(chk_row) <- c("year", "mode", "done")
+  if (merge_done == "FALSE") {
+    
+    chk_row <- data.frame(year = year_range[1], mode = "m", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+  } 
   
   if (length(year_range) >= 3) {
     
-    mid_row <- data.frame(year = c(year_range[2:length[year_range] - 1], mode = c("m", "vbox"), done = NA))
+    mid_row <- data.frame(year = c(year_range[2:length[year_range] - 1], mode = c("m", "vbox")))
     chk_row <- bind_row(chk_row, mid_row)
     
   }
+  
 }
 
 if (file_year == year_range[length(year_range)]) {
   
-  chk_row <- matrix(c(
-    year_range[length(year_range)], "s", "v",
-    year_range[1], "vbox", NA,
-    year_range[length(year_range)], "vbox", NA), ncol = 3, byrow = TRUE)
+  if (merge_done == "TRUE") { 
+    
+    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "s", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+  } 
   
-  chk_row <- as.data.frame(chk_row)
-  
-  colnames(chk_row) <- c("year", "mode", "done")
+  if (merge_done == "FALSE") {
+    
+    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+  } 
   
   if (length(year_range) >= 3) {
     
@@ -218,20 +231,40 @@ if (file_year > year_range[1] & file_year < year_range[length(year_range)]) {
     
     doc_year <- setdiff(pre_year, setdiff(year_range, year))
     
+    if (merge_done == "TRUE") {
+      
+      chk_row <- data.frame(year = doc_year, mode = "s", mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = doc_year, mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "m", mult = "1", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
+      
+    }
+    
+    if (merge_done == "FALSE") {
+      
+      chk_row <- data.frame(year = doc_year, mode = c("s", "vbox"), mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = file_year, mode = "m", mult = "1", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
+      
+    }
+    
   } else {
     
     doc_year <- pre_year
     
   }
   
-  chk_row <- data.frame(year = doc_year, mode = c("s", "vbox"), done = "v", stringsAsFactors = FALSE) %>%
-    bind_rows(data.frame(year = file_year, mode = "m", done = NA, stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = file_year, mode = "m", done = "v", stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = file_year, mode = "s", done = NA, stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = file_year, mode = "s", done = "v", stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = file_year, mode = "vbox", done = NA, stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", done = NA, stringsAsFactors = FALSE)) %>%
-    bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", done = NA, stringsAsFactors = FALSE))
+  
+  
+ 
   
 }
 
@@ -240,7 +273,7 @@ merge_list <- list()
 for (chk in 1:nrow(chk_row)) {
   
   mode_chk <- as.character(chk_row$mode[chk])
-  done_chk <- as.character(chk_row$done[chk])
+  #done_chk <- as.character(chk_row$done[chk])
   
   if (mode_chk == "vbox") {
     
@@ -252,15 +285,37 @@ for (chk in 1:nrow(chk_row)) {
     merge_chk <- merge_temp %>%
       filter(!!sym(paste0("mode_", chk_row$year[chk])) == mode_chk)
     
-    if(is.na(done_chk) == TRUE) {
+      merge_chk <- merge_chk %>%
+        filter(grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
       
-      merge_chk <- merge_chk[is.na(merge_chk[, paste0("done_", chk_row$year[chk])]) == TRUE,]
       
-    } else {
       
-      merge_chk <- merge_chk[merge_chk[, paste0("done_", chk_row$year[chk])] == done_chk,]
+  #if(is.na(done_chk) == TRUE) {
+        
+        
+        
+   # } else {
       
-    }
+      merge_chk <- merge_chk %>%
+        filter(!!sym(paste0("done_", chk_row$year[chk])) == done_chk)
+      
+      merge_chk <- merge_chk %>%
+        filter(!!sym(paste0("done_", chk_row$year[chk])) == done_chk & grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
+      
+      reverse_chk <- case_when(mode_chk == "m" ~ "s",
+                               mode_chk == "s" ~ "m")  
+      
+      test <- merge_chk %>%
+        filter(case_when(chk_row$mult[chk] == "0" ~ !!sym(paste0("done_", chk_row$year[chk])) == done_chk),
+                         TRUE ~ !!sym(paste0("done_", chk_row$year[chk])) == done_chk & grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
+      
+  
+merge_chk %>% grepl(!!sym(chk_row$year[chk]), !!sym(chk_row$year[chk]) == reverse_chk)
+
+grepl(paste(merge_chk$`2014`, collapse = "|"), merge_temp$`2014`[merge_temp$mode_2014 == reverse_chk])
+        
+      
+   # }
     
   }
   
@@ -279,7 +334,7 @@ ignore_row <- list()
 
 for (gp in 1:nrow(merge_list)) {
   
-  if (gp %in% ignore_row){
+  if (gp %in% ignore_row) {
     
     
   } else {
@@ -289,8 +344,7 @@ for (gp in 1:nrow(merge_list)) {
       idfy_col <- substr(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]], regexpr("[0-9]+" ,colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]),
                          nchar(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]))
       
-      gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col]), "|", fixed = TRUE), merge_list$li_id[gp]))
-      
+      gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col], use.names = FALSE), "|", fixed = TRUE), merge_list$li_id[gp]))
       
     } else {
       
