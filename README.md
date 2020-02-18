@@ -106,7 +106,7 @@ vbox（一投開票所多村里）：2014年縣市長選舉，台中市西屯區
 
 4. 函數說明：
 
-liRef(year_range, file_year, li_table, vbox)
+liRef(year_range, file_year, li_table, vbox, done)
 
 liSum(data, col_range, merge_gp)
 
