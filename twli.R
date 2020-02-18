@@ -24,7 +24,7 @@ options(warn = -1)
 #setwd('D:/Users/Torrent/Google 雲端硬碟/stat/R/github/twli')
 setwd('/media/torrent/Database/Users/torrent/Google 雲端硬碟/stat/R/github/twli')
 setwd("/media/torrent/Database/User/Google 雲端硬碟/stat/R/github/twli")
-setwd("~/Google Drive File Stream/我的雲端硬碟/stat/R/github/twli")
+setwd("~/Google Drive File Stream/我的雲端硬碟/stat/R/github/twli_code")
 
 result_2009_ty <- read_xlsx("data/result_2009_ty.xlsx")
 result_2010_kc <- read_xlsx("data/result_2010_kc.xlsx")
@@ -36,7 +36,7 @@ li_table <- read_xlsx("data/li_table.xlsx", sheet = "Sheet1", col_types = "text"
 
 year_range <- c("2009", "2018")
 
-file_year <- "2014"
+file_year <- "2009"
 
 merge_done <- c("TRUE")
 
@@ -163,37 +163,54 @@ li_merge_table <- merge_ref(li_table, c(2014, 2018), "2018")
 
 year_range <- seq(year_range[1], year_range[2])
 
-year <- colnames(li_table)[8:ncol(li_table)][nchar(colnames(li_table)[8:ncol(li_table)]) == 4]
+grep("[0-9]{4}", colnames(li_table))[1]
+
+year <- colnames(li_table)[grep("[0-9]{4}", colnames(li_table))[1]:ncol(li_table)][nchar(colnames(li_table)[grep("[0-9]{4}", colnames(li_table))[1]:ncol(li_table)]) == 4]
 
 year_range <- unique(c(year_range[1],  year[year %in% year_range], year_range[length(year_range)]))
 
 merge_temp <- dplyr::select(li_table, c(1:7), contains(year_range))
 
-merge_temp <- merge_temp[rowSums(is.na(merge_temp[, year])) != length(year),]
+merge_year <- intersect(year, year_range)
+
+merge_temp <- merge_temp[rowSums(is.na(merge_temp[, merge_year])) != length(merge_year),]
 
 #不同年度所需各種整併情況
 
 if (file_year == year_range[1]) { #檔案年度為資料處理範圍第一年
   
+  if (file_year < merge_year[1]) {
+    
+    merge_done = "FALSE"
+    
+  }
+  
   if (merge_done == "TRUE") { 
     
-    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+    chk_row <- data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "s", mult = "1", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
   } 
   
   if (merge_done == "FALSE") {
     
-    chk_row <- data.frame(year = year_range[1], mode = "m", stringsAsFactors = FALSE) %>%
-      bind_rows(data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE)) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+    chk_row <- data.frame(year = merge_year[1], mode = "m", mult = "0", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "s", mult = "1", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
   } 
   
   if (length(year_range) >= 3) {
     
-    mid_row <- data.frame(year = c(year_range[2:length[year_range] - 1], mode = c("m", "vbox")))
-    chk_row <- bind_row(chk_row, mid_row)
+    mid_row <- data.frame(year = c(merge_year[2:(length(merge_year) - 1)]), mode = "m", mult = "0", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = c(merge_year[2:(length(merge_year) - 1)]), mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = c(merge_year[2:(length(merge_year) - 1)]), mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = c(merge_year[2:(length(merge_year) - 1)]), mode = "s", mult = "1", stringsAsFactors = FALSE))
+      
+    chk_row <- bind_rows(chk_row, mid_row)
     
   }
   
@@ -203,33 +220,33 @@ if (file_year == year_range[length(year_range)]) {
   
   if (merge_done == "TRUE") { 
     
-    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "s", stringsAsFactors = FALSE)) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+    chk_row <- data.frame(year = year_range[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
   } 
   
   if (merge_done == "FALSE") {
     
-    chk_row <- data.frame(year = year_range[1], mode = "vbox", stringsAsFactors = FALSE) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", stringsAsFactors = FALSE)) %>%
-      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", stringsAsFactors = FALSE))
+    chk_row <- data.frame(year = year_range[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+      bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
   } 
   
   if (length(year_range) >= 3) {
     
-    mid_row <- data.frame(year = c(year_range[2:length[year_range] - 1], mode = c("s", "vbox"), done = NA))
+    mid_row <- data.frame(year = c(year_range[2:length[year_range] - 1], mode = c("s", "c", "vbox"), mult = "0", stringsAsFactors = FALSE))
     chk_row <- bind_row(chk_row, mid_row)
     
   }
 }
 
-if (file_year > year_range[1] & file_year < year_range[length(year_range)]) {
+if (file_year > year_range[1] & file_year < year_range[length(year_range)]) { #資料年位於處理資料時間範圍的中間
   
-  pre_year <- year_range[year_range < file_year]
+  pre_year <- year_range[year_range < file_year] #資料年之前的年度，包括其他資料及li_table裡面的資料年
   
-  if (length(setdiff(year_range, year)) > 0) {
+  if (length(setdiff(year_range, year)) > 0) { #檢測資料年之前的年度，裡面是否有比li_table裡面的資料年還前面的
     
-    doc_year <- setdiff(pre_year, setdiff(year_range, year))
+    doc_year <- setdiff(pre_year, setdiff(year_range, year)) #li_table裡面的資料年之年度
     
     if (merge_done == "TRUE") {
       
@@ -257,10 +274,37 @@ if (file_year > year_range[1] & file_year < year_range[length(year_range)]) {
       
     }
     
-}
+  }
   
-  
- 
+  if (length(setdiff(year_range, year)) == 0) {
+    
+    doc_year <- pre_year
+    
+    if (merge_done == "TRUE") {
+      
+      chk_row <- data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = doc_year, mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "m", mult = "1", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
+      
+    }
+    
+    if (merge_done == "FALSE") {
+      
+      chk_row <- data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = file_year, mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "c", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = file_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
+        bind_rows(data.frame(year = year_range[length(year_range)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
+      
+    }
+    
+  }
   
 }
 
@@ -268,7 +312,7 @@ merge_list <- list()
 
 for (chk in 1:nrow(chk_row)) {
   
-  #chk = 6
+  #chk = 3
   mode_chk <- as.character(chk_row$mode[chk])
   #done_chk <- as.character(chk_row$done[chk])
   
@@ -282,8 +326,13 @@ for (chk in 1:nrow(chk_row)) {
     merge_chk <- merge_temp %>%
       filter(!!sym(paste0("mode_", chk_row$year[chk])) == mode_chk)
     
-      #merge_chk <- merge_chk %>%
-      #  filter(grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
+
+  }
+  
+  if (chk_row$mult[chk] == "1") {
+    
+    merge_chk <- merge_chk %>%
+      filter(grepl("\\|", !!sym(chk_row$year[chk])) == TRUE)
     
   }
   
@@ -302,7 +351,7 @@ ignore_row <- list()
 
 for (gp in 1:nrow(merge_list)) {
   
-  gp <- 1 
+  #gp <- 2 
   
   if (gp %in% ignore_row) {
     
@@ -376,24 +425,20 @@ for (gp in 1:nrow(merge_list)) {
   
 }
 
-
+li_merge_table <- merge_gp
 
 #村里整併加總函數
 
-col_range <- c(5:12)
-
-merge_obj <- c("result_2018_kyc")
-
 merge_add <- function(data, col_range, merge_gp) {
   
-  for (mg in 1:max(merge_gp$group)) { 
+  for (mg in 1:length(unique(merge_gp$group))) { 
     
     #mg = 1
   
     mg_temp <- merge_gp %>%
     filter(group == unique(merge_gp$group)[mg])
     
-    mg_result <- get(merge_obj) %>%
+    mg_result <- data %>%
     filter(li_id == mg_temp$li_id[1])
     
     mg_result[, col_range] <- colSums(data[data$li_id %in%mg_temp$li_id, col_range], na.rm = TRUE)
@@ -414,7 +459,151 @@ merge_add <- function(data, col_range, merge_gp) {
   
 }
 
-test <- merge_add(result_2018_kyc, c(5:12), li_merge_table)
+test <- merge_add(result_2014_kyc, c(2:9), li_merge_table)
+
+#村里合併加總原始碼-----
+
+col_range <- c(2:8)
+
+col_name <- colnames(result_2009_ty)[col_range]
+
+merge_obj <- c("result_2009_ty")
+
+mg_target <- result_2009_ty %>%
+  left_join(merge_gp, by = "li_id") %>%
+  filter(is.na(group) == FALSE)
+
+mg_target <- mg_target %>%
+  group_by(group) %>%
+  summarise_at(vars(all_of(col_name)), sum, na.rm = TRUE)
+
+mg_target <- mg_target %>%
+  left_join(merge_gp[merge_gp$merge_code == "1",], by = "group")
+
+result_2009_ty[match(mg_target$li_id, result_2009_ty$li_id), col_name] <- mg_target[, col_name]
+
+result_2009_ty <- result_2009_ty %>%
+  filter(!li_id %in% merge_gp$li_id[merge_gp$merge_code != 1])
+
+result_2009_ty <- result_2009_ty %>%
+  mutate(li_adjust = case_when(li_id %in% merge_gp$li_id[merge_gp$merge_code == 1] ~ 1,
+                               TRUE ~ 0))
+
+result_compare <- result_2009_ty %>%
+  left_join(result_2018_kyc, by = "li_id")
+
+
+#舊版
+
+for (mg in 1:length(unique(merge_gp$group))) { 
+  
+  #mg = 1
+  
+  mg_temp <- merge_gp %>%
+    filter(group == unique(merge_gp$group)[mg])
+  
+  mg_result <- result_2014_kyc %>%
+    filter(li_id == mg_temp$li_id[1])
+  
+  mg_result[, col_range] <- colSums(result_2014_kyc[result_2014_kyc$li_id %in%mg_temp$li_id, col_range], na.rm = TRUE)
+  
+  result_2014_kyc[result_2014_kyc$li_id == mg_result$li_id,] <- mg_result
+  
+  result_2014_kyc$li_adjust <- "0"
+  
+  result_2014_kyc$li_adjust[result_2014_kyc$li_id == mg_result$li_id] <- "1"
+  
+  result_2014_kyc <- result_2014_kyc %>%
+    filter(li_id != mg_temp$li_id[-1])
+  
+}
+
+
+####村里合併欄位運算原始碼-----
+
+717/(1265-16-7)
+
+#DPP_2014/(num_voter_2014 - invaild_vote_2014 - Other_2014)
+
+fu <- "DPP_2014 / (num_voter_2014 - invaild_vote_2014 - Other_2014)"
+
+equal <- c("DPP_rate_2014")
+
+col_spl <- unlist(strsplit(gsub("\\s", "", fu), "/|-|\\(|\\)|\\*|\\^"))
+col_spl <- col_spl[nchar(col_spl) != 0]
+
+mg_target <- result_2014_kyc %>%
+  left_join(merge_gp, by = "li_id") %>%
+  filter(is.na(group) == FALSE)
+
+mg_target <- mg_target %>%
+  group_by(group) %>%
+  summarise_at(vars(all_of(col_spl)), sum, na.rm = TRUE)
+
+mg_target <- mg_target %>%
+  mutate(!!equal := !!parse_expr(fu))
+
+mg_target <- mg_target %>%
+  left_join(merge_gp[merge_gp$merge_code == "1",], by = "group")
+
+result_2014_kyc[match(mg_target$li_id, result_2014_kyc$li_id), c(col_spl, equal)] <- mg_target[, c(col_spl, equal)]
+
+result_2014_kyc <- result_2014_kyc %>%
+  filter(!li_id %in% merge_gp$li_id[merge_gp$merge_code != 1])
+
+result_2014_kyc <- result_2014_kyc %>%
+  mutate(li_adjust = case_when(li_id %in% merge_gp$li_id[merge_gp$merge_code == 1] ~ 1,
+                               TRUE ~ 0))
+
+
+####村里合併shape檔處理-----
+
+
+
+kh_map <- shapefile("data/Kaohsiung/VillageKH_NLSC_1041007.shp")
+
+plot(kh_map)
+
+li_adjusted <- data.frame(li_id = c("6403400-005", "6403400-006", "6403400-008", "6401200-045", "6401200-062"), merge_code = c("1", "2", "2", "1", "2"), group = c("1", "1", "1", "2", "2"))
+
+map_adjusted <- kh_map
+
+for (g_idx in 1:length(unique(li_adjusted$group))) {
+  
+  agg_map <- aggregate(rbind(map_adjusted[map_adjusted$VILLAGE_ID %in% li_adjusted$li_id[li_adjusted$group == g_idx],]))
+  
+  maintain_li <- map_adjusted@data[map_adjusted$VILLAGE_ID == li_adjusted$li_id[li_adjusted$group == g_idx & li_adjusted$merge_code == "1"],]
+  
+  agg_map <- spChFIDs(agg_map, as.character(map_adjusted$OBJECTID[map_adjusted$VILLAGE_ID == li_adjusted$li_id[li_adjusted$group == g_idx & li_adjusted$merge_code == "1"]]))
+  
+  map_adjusted <- map_adjusted[!map_adjusted$VILLAGE_ID %in% li_adjusted$li_id[li_adjusted$group == g_idx],]
+  
+  map_adjusted <- spChFIDs(map_adjusted, as.character(map_adjusted$OBJECTID))
+  
+  map_adjusted <- raster::bind(map_adjusted, agg_map)
+  
+  map_adjusted@data[nrow(map_adjusted@data),] <- maintain_li
+  
+}
+
+shapefile(map_adjusted, "data/map_adjusted/Kaohsiung/kh_map_adjusted_20200217.shp", overwrite = TRUE)
+
+#dbf <- read.dbf("data/map_adjusted/Kaohsiung/kh_map_adjusted_20191022.dbf")
+
+#dbf <- map_adjusted@data
+
+write.dbf(map_adjusted@data, "data/map_adjusted/Kaohsiung/kh_map_adjusted_20200217.dbf")
+
+map_encoding <- shapefile("data/map_adjusted/Kaohsiung/kh_map_adjusted_20200217.shp")
+
+
+
+
+
+
+
+
+####end
 
 
 for (mg in 1:max(merge_gp$group)) {
@@ -425,7 +614,7 @@ for (mg in 1:max(merge_gp$group)) {
   mg_result <- get(merge_obj) %>%
     filter(li_id == mg_temp$li_id[1])
   
-  test <- get(merge_obj)[get(merge_obj)$li_id %in%mg_temp$li_id, ]
+  #test <- get(merge_obj)[get(merge_obj)$li_id %in%mg_temp$li_id, ]
   
   mg_result[, col_range] <- colSums(get(merge_obj)[get(merge_obj)$li_id %in%mg_temp$li_id, col_range], na.rm = TRUE)
   
@@ -442,7 +631,6 @@ for (mg in 1:max(merge_gp$group)) {
   
 }
 
-####end
 
 
 
