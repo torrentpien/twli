@@ -160,7 +160,7 @@ merge_ref <- function(li_table, year_range, file_year) {
 
 li_merge_table <- merge_ref(li_table, c(2014, 2018), "2018")
 
-#村里合併表格函數原始碼-----
+# liRef 村里合併表格函數原始碼-----
 
 year_range <- seq(year_range[1], year_range[2])
 
@@ -462,7 +462,7 @@ merge_add <- function(data, col_range, merge_gp) {
 
 test <- merge_add(result_2014_kyc, c(2:9), li_merge_table)
 
-#村里合併加總原始碼-----
+# liSum 村里合併加總原始碼-----
 
 col_range <- c(2:8)
 
@@ -520,7 +520,7 @@ for (mg in 1:length(unique(merge_gp$group))) {
 }
 
 
-####村里合併欄位運算原始碼-----
+# liEqu 村里合併欄位運算原始碼-----
 
 #DPP_2014/(num_voter_2014 - invaild_vote_2014 - Other_2014)
 
@@ -555,7 +555,7 @@ result_2014_kyc <- result_2014_kyc %>%
                                TRUE ~ 0))
 
 
-####村里合併shape檔處理-----
+#### liShp 村里合併shape檔處理-----
 
 
 
