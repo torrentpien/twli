@@ -9,6 +9,7 @@ library(lmtest)
 library(GISTools)
 library(raster)
 library(maptools)
+library(foreign)
 library(readr)
 library(readxl)
 library(writexl)
@@ -520,8 +521,6 @@ for (mg in 1:length(unique(merge_gp$group))) {
 
 
 ####村里合併欄位運算原始碼-----
-
-717/(1265-16-7)
 
 #DPP_2014/(num_voter_2014 - invaild_vote_2014 - Other_2014)
 
