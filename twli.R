@@ -34,12 +34,13 @@ result_2018_kyc <- read_xlsx("data/result_2018_kyc.xlsx")
 
 
 li_table <- read_xlsx("data/li_table.xlsx", sheet = "Sheet1", col_types = "text")
+x <- read_xlsx("data/li_fongshan.xlsx", col_types = "text")
 
-year_range <- c("2009", "2018")
+range <- c("2010", "2014")
 
-file_year <- "2014"
+year <- "2014"
 
-merge_done <- c("TRUE")
+done <- c("TRUE")
 
 vbox <- c("TRUE")
 
@@ -49,15 +50,13 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
   
   range <- seq(range[1], range[2])
   
-  grep("[0-9]{4}", colnames(x))[1]
+  record_year <- colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)][nchar(colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)]) == 4]
   
-  year <- colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)][nchar(colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)]) == 4]
-  
-  range <- unique(c(range[1],  year[year %in% range], range[length(range)]))
+  range <- unique(c(range[1],  record_year[record_year %in% range], range[length(range)]))
   
   merge_temp <- dplyr::select(x, c(1:7), contains(range))
   
-  merge_year <- intersect(year, range)
+  merge_year <- intersect(record_year, range)
   
   merge_temp <- merge_temp[rowSums(is.na(merge_temp[, merge_year])) != length(merge_year),]
   
@@ -67,11 +66,11 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
     
     if (year < merge_year[1]) {
       
-      done = "FALSE"
+      done = FALSE
       
     }
     
-    if (done == "TRUE") { 
+    if (done == TRUE) { 
       
       chk_row <- data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -80,7 +79,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
     } 
     
-    if (done == "FALSE") {
+    if (done == FALSE) {
       
       chk_row <- data.frame(year = merge_year[1], mode = "m", mult = "0", stringsAsFactors = FALSE) %>%
         bind_rows(data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -110,11 +109,11 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
     
     if (year > merge_year[length(merge_year)]) {
       
-      done = "done"
+      done = TRUE
       
     }
     
-    if (done == "TRUE") { 
+    if (done == TRUE) { 
       
       chk_row <- data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "t", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -122,7 +121,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
     } 
     
-    if (done == "FALSE") {
+    if (done == FALSE) {
       
       chk_row <- data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "m", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -150,7 +149,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
       
       doc_year <- setdiff(pre_year, setdiff(range, year)) #x裡面的資料年之年度
       
-      if (done == "TRUE") {
+      if (done == TRUE) {
         
         chk_row <- data.frame(year = doc_year, mode = "s", mult = "0", stringsAsFactors = FALSE) %>%
           bind_rows(data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -167,7 +166,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
         
       }
       
-      if (done == "FALSE") {
+      if (done == FALSE) {
         
         chk_row <- data.frame(year = doc_year, mode = "s", mult = "0", stringsAsFactors = FALSE) %>%
           bind_rows(data.frame(year = doc_year, mode = "t", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -188,7 +187,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
       
       doc_year <- pre_year
       
-      if (done == "TRUE") {
+      if (done == TRUE) {
         
         chk_row <- data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
           bind_rows(data.frame(year = doc_year, mode = "t", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -205,7 +204,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
         
       }
       
-      if (done == "FALSE") {
+      if (done == FALSE) {
         
         chk_row <- data.frame(year = doc_year, mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
           bind_rows(data.frame(year = doc_year, mode = "t", mult = "0", stringsAsFactors = FALSE)) %>%
@@ -223,7 +222,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
     
   }
   
-  if (vbox == "FALSE") {
+  if (vbox == FALSE) {
     
     chk_row <- chk_row %>%
       filter(mode != "vbox")
@@ -268,80 +267,90 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
     
   }
   
-  merge_gp <- list()
-  ignore_row <- list()
+  if (nrow(merge_list) == 0) {
+    
+    merge_gp <- list()
+    
+  }
   
-  for (gp in 1:nrow(merge_list)) {
+  if (nrow(merge_list) > 0) {
     
-    #gp <- 2 
+    merge_gp <- list()
+    ignore_row <- list()
     
-    if (gp %in% ignore_row) {
+    for (gp in 1:nrow(merge_list)) {
       
+      #gp <- 2 
       
-    } else {
-      
-      if (length(grep("vbox", merge_list[gp,])) > 0) {
+      if (gp %in% ignore_row) {
         
-        idfy_col <- substr(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]], regexpr("[0-9]+" ,colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]),
-                           nchar(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]))
-        
-        gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col], use.names = FALSE), "|", fixed = TRUE), merge_list$li_id[gp]))
         
       } else {
         
-        #從這裡開始，多里合併處理
-        
-        #gp_cand <- c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"]))
-        
-        gp_cand <- paste(c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"])), collapse = "|")
-        
-        gp_list <- unlist(strsplit(gp_cand, "|", fixed = TRUE))
-        
-        complete_row <- gp
-        
-        mult_lichk <- "1"
-        
-        while(length(mult_lichk) > 0) {
+        if (length(grep("vbox", merge_list[gp,])) > 0) {
           
-          idfy_row <- grep(gp_cand, unlist(merge_list[, merge_list$year[gp]]))
+          idfy_col <- substr(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]], regexpr("[0-9]+" ,colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]),
+                             nchar(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]))
           
-          complete_chk <- gp_list
+          gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col], use.names = FALSE), "|", fixed = TRUE), merge_list$li_id[gp]))
           
-          row_rd <- setdiff(idfy_row, complete_row)
+        } else {
           
-          complete_row <- union(idfy_row, complete_row)
+          #從這裡開始，多里合併處理
           
-          print("1")
+          #gp_cand <- c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"]))
           
-          #gp_cand <- unique(unlist(c(merge_list[row_rd, merge_list$year[gp]], merge_list[row_rd, "li_id"])))
+          gp_cand <- paste(c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"])), collapse = "|")
           
-          gp_cand <- c(unlist(merge_list[row_rd, merge_list$year[gp]]), unlist(merge_list[row_rd, "li_id"]))
+          gp_list <- unlist(strsplit(gp_cand, "|", fixed = TRUE))
           
-          mult_lichk <- unique(unlist(c(strsplit(unlist(gp_cand), "|", fixed = TRUE))))
+          complete_row <- gp
           
-          mult_lichk <- setdiff(mult_lichk, complete_chk)
+          mult_lichk <- "1"
           
-          gp_list <- c(gp_list, mult_lichk)
+          while(length(mult_lichk) > 0) {
+            
+            idfy_row <- grep(gp_cand, unlist(merge_list[, merge_list$year[gp]]))
+            
+            complete_chk <- gp_list
+            
+            row_rd <- setdiff(idfy_row, complete_row)
+            
+            complete_row <- union(idfy_row, complete_row)
+            
+            #print("1")
+            
+            #gp_cand <- unique(unlist(c(merge_list[row_rd, merge_list$year[gp]], merge_list[row_rd, "li_id"])))
+            
+            gp_cand <- c(unlist(merge_list[row_rd, merge_list$year[gp]]), unlist(merge_list[row_rd, "li_id"]))
+            
+            mult_lichk <- unique(unlist(c(strsplit(unlist(gp_cand), "|", fixed = TRUE))))
+            
+            mult_lichk <- setdiff(mult_lichk, complete_chk)
+            
+            gp_list <- c(gp_list, mult_lichk)
+            
+            gp_cand <- paste(mult_lichk, collapse = "|")
+            
+            #print("2")
+            
+          }
           
-          gp_cand <- paste(mult_lichk, collapse = "|")
+          ignore_row <- union(ignore_row, complete_row)
+          ignore_row <- setdiff(ignore_row, gp)
           
-          print("2")
+          gp_list <- c(sort(setdiff(gp_list, merge_list$li_id[complete_row])), merge_list$li_id[complete_row])
+          
+          #li_gp <- unlist(c(strsplit(unlist(merge_list[gp, merge_list$year[gp]]), "|", fixed = TRUE), merge_list$li_id[gp]))
+          #li_gp <- strsplit(gp_list, "|", fixed = TRUE)
           
         }
         
-        ignore_row <- union(ignore_row, complete_row)
-        ignore_row <- setdiff(ignore_row, gp)
+        merge_gp_temp <- data.frame(li_id = gp_list, merge_code = seq(1:length(gp_list)), group = gp)
         
-        gp_list <- c(sort(setdiff(gp_list, merge_list$li_id[complete_row])), merge_list$li_id[complete_row])
-        
-        #li_gp <- unlist(c(strsplit(unlist(merge_list[gp, merge_list$year[gp]]), "|", fixed = TRUE), merge_list$li_id[gp]))
-        #li_gp <- strsplit(gp_list, "|", fixed = TRUE)
+        merge_gp <- rbind(merge_gp, merge_gp_temp)
         
       }
-      
-      merge_gp_temp <- data.frame(li_id = gp_list, merge_code = seq(1:length(gp_list)), group = gp)
-      
-      merge_gp <- rbind(merge_gp, merge_gp_temp)
       
     }
     
@@ -358,15 +367,13 @@ liRef(li_table, range = c("2009", "2018"), year = "2014")
 
 range <- seq(range[1], range[2])
 
-grep("[0-9]{4}", colnames(x))[1]
+record_year <- colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)][nchar(colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)]) == 4]
 
-year <- colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)][nchar(colnames(x)[grep("[0-9]{4}", colnames(x))[1]:ncol(x)]) == 4]
-
-range <- unique(c(range[1],  year[year %in% range], range[length(range)]))
+range <- unique(c(range[1],  record_year[record_year %in% range], range[length(range)]))
 
 merge_temp <- dplyr::select(x, c(1:7), contains(range))
 
-merge_year <- intersect(year, range)
+merge_year <- intersect(record_year, range)
 
 merge_temp <- merge_temp[rowSums(is.na(merge_temp[, merge_year])) != length(merge_year),]
 
@@ -419,7 +426,7 @@ if (year == range[length(range)]) {
   
   if (year > merge_year[length(merge_year)]) {
     
-    done = "done"
+    done = "TRUE"
     
   }
   
@@ -577,92 +584,104 @@ for (chk in 1:nrow(chk_row)) {
   
 }
 
-merge_gp <- list()
-ignore_row <- list()
+if (nrow(merge_list) == 0) {
+  
+  merge_gp <- list()
+  
+}
 
-for (gp in 1:nrow(merge_list)) {
+if (nrow(merge_list) > 0) {
   
-  #gp <- 2 
+  merge_gp <- list()
+  ignore_row <- list()
   
-  if (gp %in% ignore_row) {
+  for (gp in 1:nrow(merge_list)) {
     
+    #gp <- 2 
     
-  } else {
-    
-    if (length(grep("vbox", merge_list[gp,])) > 0) {
+    if (gp %in% ignore_row) {
       
-      idfy_col <- substr(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]], regexpr("[0-9]+" ,colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]),
-                         nchar(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]))
-      
-      gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col], use.names = FALSE), "|", fixed = TRUE), merge_list$li_id[gp]))
       
     } else {
       
-      #從這裡開始，多里合併處理
-      
-      #gp_cand <- c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"]))
-      
-      gp_cand <- paste(c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"])), collapse = "|")
-      
-      gp_list <- unlist(strsplit(gp_cand, "|", fixed = TRUE))
-      
-      complete_row <- gp
-      
-      mult_lichk <- "1"
-      
-      while(length(mult_lichk) > 0) {
+      if (length(grep("vbox", merge_list[gp,])) > 0) {
         
-        idfy_row <- grep(gp_cand, unlist(merge_list[, merge_list$year[gp]]))
+        idfy_col <- substr(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]], regexpr("[0-9]+" ,colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]),
+                           nchar(colnames(merge_list[gp,])[grep("vbox", merge_list[gp,])[1]]))
         
-        complete_chk <- gp_list
+        gp_list <- unlist(c(strsplit(unlist(merge_list[gp, idfy_col], use.names = FALSE), "|", fixed = TRUE), merge_list$li_id[gp]))
         
-        row_rd <- setdiff(idfy_row, complete_row)
+      } else {
         
-        complete_row <- union(idfy_row, complete_row)
+        #從這裡開始，多里合併處理
         
-        print("1")
+        #gp_cand <- c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"]))
         
-        #gp_cand <- unique(unlist(c(merge_list[row_rd, merge_list$year[gp]], merge_list[row_rd, "li_id"])))
+        gp_cand <- paste(c(unlist(merge_list[gp, merge_list$year[gp]]), unlist(merge_list[gp, "li_id"])), collapse = "|")
         
-        gp_cand <- c(unlist(merge_list[row_rd, merge_list$year[gp]]), unlist(merge_list[row_rd, "li_id"]))
+        gp_list <- unlist(strsplit(gp_cand, "|", fixed = TRUE))
         
-        mult_lichk <- unique(unlist(c(strsplit(unlist(gp_cand), "|", fixed = TRUE))))
+        complete_row <- gp
         
-        mult_lichk <- setdiff(mult_lichk, complete_chk)
+        mult_lichk <- "1"
         
-        gp_list <- c(gp_list, mult_lichk)
+        while(length(mult_lichk) > 0) {
+          
+          idfy_row <- grep(gp_cand, unlist(merge_list[, merge_list$year[gp]]))
+          
+          complete_chk <- gp_list
+          
+          row_rd <- setdiff(idfy_row, complete_row)
+          
+          complete_row <- union(idfy_row, complete_row)
+          
+          #print("1")
+          
+          #gp_cand <- unique(unlist(c(merge_list[row_rd, merge_list$year[gp]], merge_list[row_rd, "li_id"])))
+          
+          gp_cand <- c(unlist(merge_list[row_rd, merge_list$year[gp]]), unlist(merge_list[row_rd, "li_id"]))
+          
+          mult_lichk <- unique(unlist(c(strsplit(unlist(gp_cand), "|", fixed = TRUE))))
+          
+          mult_lichk <- setdiff(mult_lichk, complete_chk)
+          
+          gp_list <- c(gp_list, mult_lichk)
+          
+          gp_cand <- paste(mult_lichk, collapse = "|")
+          
+          #print("2")
+          
+        }
         
-        gp_cand <- paste(mult_lichk, collapse = "|")
+        ignore_row <- union(ignore_row, complete_row)
+        ignore_row <- setdiff(ignore_row, gp)
         
-        print("2")
+        gp_list <- c(sort(setdiff(gp_list, merge_list$li_id[complete_row])), merge_list$li_id[complete_row])
+        
+        #li_gp <- unlist(c(strsplit(unlist(merge_list[gp, merge_list$year[gp]]), "|", fixed = TRUE), merge_list$li_id[gp]))
+        #li_gp <- strsplit(gp_list, "|", fixed = TRUE)
         
       }
       
-      ignore_row <- union(ignore_row, complete_row)
-      ignore_row <- setdiff(ignore_row, gp)
+      merge_gp_temp <- data.frame(li_id = gp_list, merge_code = seq(1:length(gp_list)), group = gp)
       
-      gp_list <- c(sort(setdiff(gp_list, merge_list$li_id[complete_row])), merge_list$li_id[complete_row])
-      
-      #li_gp <- unlist(c(strsplit(unlist(merge_list[gp, merge_list$year[gp]]), "|", fixed = TRUE), merge_list$li_id[gp]))
-      #li_gp <- strsplit(gp_list, "|", fixed = TRUE)
+      merge_gp <- rbind(merge_gp, merge_gp_temp)
       
     }
-    
-    merge_gp_temp <- data.frame(li_id = gp_list, merge_code = seq(1:length(gp_list)), group = gp)
-    
-    merge_gp <- rbind(merge_gp, merge_gp_temp)
     
   }
   
 }
 
+
+
 li_merge_table <- merge_gp
 
 ######村里整併加總函數----
 
-liRef <- function(x, range, year, vbox = FALSE, done = TRUE)
-
-liSum <- function(x, ref, cols) {
+liSum <- function(x, ref, cols, finish = FALSE) {
+  
+  col_name <- colnames(x)[cols]
   
   mg_target <- x %>%
     left_join(ref, by = "li_id") %>%
@@ -670,19 +689,24 @@ liSum <- function(x, ref, cols) {
   
   mg_target <- mg_target %>%
     group_by(group) %>%
-    summarise_at(vars(all_of(cols)), sum, na.rm = TRUE)
+    summarise_at(vars(all_of(col_name)), sum, na.rm = TRUE)
   
   mg_target <- mg_target %>%
     left_join(ref[ref$merge_code == "1",], by = "group")
   
-  x[match(mg_target$li_id, x$li_id), cols] <- mg_target[, cols]
+  x[match(mg_target$li_id, x$li_id), col_name] <- mg_target[, col_name]
   
-  x <- x %>%
-    filter(!li_id %in% ref$li_id[ref$merge_code != 1])
+  if (finish == TRUE) {
+    
+    x <- x %>%
+      filter(!li_id %in% ref$li_id[ref$merge_code != 1])
+    
+    x <- x %>%
+      mutate(li_adjust = case_when(li_id %in% ref$li_id[ref$merge_code == 1] ~ 1,
+                                   TRUE ~ 0))
+    
+  }
   
-  x <- x %>%
-    mutate(li_adjust = case_when(li_id %in% ref$li_id[ref$merge_code == 1] ~ 1,
-                                 TRUE ~ 0))
   return(x)
   
 }
@@ -749,9 +773,9 @@ for (mg in 1:length(unique(merge_gp$group))) {
 
 # 村里合併欄位運算函數------
 
-liEqu <- function(x, ref, result, equ) {
+liEqu <- function(x, ref, result, equ, finish = FALSE) {
   
-  col_spl <- unlist(strsplit(gsub("\\s", "", equ), "/|-|\\(|\\)|\\*|\\^"))
+  col_spl <- unlist(strsplit(gsub("\\s", "", equ), "/|-|\\(|\\)|\\*|\\^|\\+"))
   col_spl <- col_spl[nchar(col_spl) != 0]
   
   mg_target <- x %>%
@@ -770,12 +794,16 @@ liEqu <- function(x, ref, result, equ) {
   
   x[match(mg_target$li_id, x$li_id), c(col_spl, result)] <- mg_target[, c(col_spl, result)]
   
-  x <- x %>%
-    filter(!li_id %in% ref$li_id[ref$merge_code != 1])
-  
-  x <- x %>%
-    mutate(li_adjust = case_when(li_id %in% ref$li_id[ref$merge_code == 1] ~ 1,
-                                 TRUE ~ 0))
+  if (finish == TRUE) {
+    
+    x <- x %>%
+      filter(!li_id %in% ref$li_id[ref$merge_code != 1])
+    
+    x <- x %>%
+      mutate(li_adjust = case_when(li_id %in% ref$li_id[ref$merge_code == 1] ~ 1,
+                                   TRUE ~ 0))
+    
+  }
   
   return(x)
   
@@ -786,10 +814,13 @@ liEqu <- function(x, ref, result, equ) {
 #DPP_2014/(num_voter_2014 - invaild_vote_2014 - Other_2014)
 
 fu <- "DPP_2014 / (num_voter_2014 - invaild_vote_2014 - Other_2014)"
+fu <- "(KMT_2010 + Other_2010) / vaild_vote_2010"
 
-equal <- c("DPP_rate_2014")
 
-col_spl <- unlist(strsplit(gsub("\\s", "", fu), "/|-|\\(|\\)|\\*|\\^"))
+
+equal <- c("KMT_rate_2010")
+
+col_spl <- unlist(strsplit(gsub("\\s", "", fu), "/|-|\\(|\\)|\\*|\\^|\\+"))
 col_spl <- col_spl[nchar(col_spl) != 0]
 
 mg_target <- result_2014_kyc %>%
@@ -882,11 +913,20 @@ write.dbf(map_adjusted@data, "data/map_adjusted/Kaohsiung/kh_map_adjusted_202002
 
 map_encoding <- shapefile("data/map_adjusted/Kaohsiung/kh_map_adjusted_20200217.shp")
 
+#案例-----
 
+fongshan_2010 <- read.csv("data/fongshan_2010.csv", stringsAsFactors = FALSE)
+fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
 
+li_fongshan <- read_xlsx("data/li_fongshan.xlsx", col_types = c("text"))
 
+fs_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2010")
 
+fs_2010_sum <- liSum(fongshan_2010, ref = fs_ref, cols = c(5:11), finish = TRUE)
 
+fs_2010_rate <- liEqu(fongshan_2010, ref = fs_ref, result = "DDP_rate_2010", equ = c("DPP_2010 / vaild_vote_2010"))
+
+fs_2010_rate <- liEqu(fs_2010_rate, ref = fs_ref, result = "KMT_rate_2010", equ = c("(KMT_2010 + Other_2010) / vaild_vote_2010"), finish = TRUE)
 
 
 ####end
