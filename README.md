@@ -176,6 +176,107 @@
 
     *  **ref**: liRef函數所產生「村里整併參照表」的物件名稱。
 
+### 範例：高雄市鳳山區2014年做了兩組村里整併：
+
+1. 海風里（6401200-023）被合併進海光里（6401200-022）。
+
+2. 誠正里（6401200-052）被合併進併入生明里（6401200-045）、誠智里（6401200-062）
+
+如果我們的研究要處理高雄市鳳山區2010、2014年兩次市長選舉，就會發生鳳山區村里數目不合。
+
+讀入鳳山區2010年選舉資料
+
+```
+fongshan_2010 <- read.csv("data/fongshan_2010.csv", stringsAsFactors = FALSE)
+
+```
+
+讀入鳳山區2014年選舉資料
+
+```
+fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
+
+```
+
+鳳山區2010年的村里數是78個，2014年的村里數是76個，2014年少了兩個里，也就是被整併的海風里、誠正里。
+
+要分析高雄市鳳山區2010、2014年的資料，必須對鳳山區這兩年度的資料進行處理。
+
+第一步：讀入高雄市鳳山區村里整併紀錄檔案li_fongshan.xlsx
+
+```
+li_fongshan <- read_xlsx("data/li_fongshan.xlsx", col_types = c("text"))
+
+```
+
+第二步：liRef函數輸入分析時間範圍及需要處理的年度，產生各年度的「村里整併參照表」
+
+```
+fs_2010_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2010")
+
+fs_2014_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
+```
+
+大家可以看到這兩個檔案不太一樣。
+
+fs_2010_ref：由於2014年進行村里整併，2010年仍處於各自獨立的村里要進行整併。
+
+fs_2014_ref：為什麼2014年整併的村里有一組仍需要在2014年進行整併，另一組則不用？主要是2014年誠正里被合併進併入生明里、誠智里，我們無法知道到底誠正里哪些居民被劃進生明里、誠智里，所以2010年是誠正里、生明里、誠智里三個村里進行整併，而到了2014年，也必須對誠正里、生明里進行整併。
+
+第三步：以liSum對2010、2014年高雄市鳳山區選舉資料進行加總
+
+```
+fs_2010_sum <- liSum(fongshan_2010, ref = fs_2010_ref, cols = c(5:11), finish = TRUE)
+
+fs_2014_sum <- liSum(fongshan_2014, ref = fs_2014_ref, cols = c(2:9), finish = TRUE)
+```
+
+兩個檔案都變成75里。
+
+第四步：以liEqu對2010、2014年高雄市鳳山區選舉資料進行民進黨、國民黨的得票率計算
+
+計算民進黨得票，如果計算完成就把部分村里刪除，這樣繼續計算國民黨的得票率就會有問題。
+
+
+```
+fs_2010_rate <- liEqu(fongshan_2010, ref = fs_2010_ref, result = "DDP_rate_2010", equ = c("DPP_2010 / vaild_vote_2010"))
+```
+
+
+我們假設算完國民黨的得票率後，就完成整併，所以就用finish = TRUE，把合併前的村里刪除。這裡的國民黨得票，要將國民黨候選人黃昭順加上以無黨籍參選的楊秋興，兩者能相加的檢測請參考：
+
+```
+fs_2010_rate <- liEqu(fs_2010_rate, ref = fs_2010_ref, result = "KMT_rate_2010", equ = c("(KMT_2010 + Other_2010) / vaild_vote_2010"), finish = TRUE)
+```
+
+用同意的方式計算2014年的民進黨、國民黨得票率：
+
+```
+fs_2014_rate <- liEqu(fongshan_2014, ref = fs_2014_ref, result = "DDP_rate_2014", equ = c("DPP_2014 / vaild_vote_2014"))
+
+fs_2014_rate <- liEqu(fs_2014_rate, ref = fs_2014_ref, result = "KMT_rate_2014", equ = c("KMT_2014 / vaild_vote_2014"), finish = TRUE)
+```
+
+第五步：以liShp對高雄鳳山區圖資進行整併
+
+讀入高雄市鳳山區2014年圖資
+
+```
+fs_map <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
+```
+
+生明里、誠智里為兩個里。
+
+先前的liSum、liEqu已經把2014年的資料，生明里、誠智里合併後，刪除誠智里，把合併後的資料併入圖資，誠智里會沒有資料。
+
+使用liShp函數合併生明里及誠智里：
+
+```
+fs_map_adjusted <- liShp(fs_map, ref = fs_2014_ref)
+```
+
+生明里合併了誠智里，高雄鳳山區的村里圖資與村里一致。
+
 ### 版本說明
 
   *  0.01 (2020.2.13): 開發中

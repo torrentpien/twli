@@ -116,6 +116,7 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
     if (done == TRUE) { 
       
       chk_row <- data.frame(year = merge_year[1], mode = "vbox", mult = "0", stringsAsFactors = FALSE) %>%
+        bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "m", mult = "1", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "t", mult = "0", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "s", mult = "0", stringsAsFactors = FALSE)) %>%
         bind_rows(data.frame(year = merge_year[length(merge_year)], mode = "vbox", mult = "0", stringsAsFactors = FALSE))
@@ -853,13 +854,13 @@ liShp <- function(x, ref) {
   
   for (g_idx in 1:length(unique(ref$group))) {
     
-    agg_map <- aggregate(rbind(x[x$VILLAGE_ID %in% ref$li_id[ref$group == g_idx],]))
+    agg_map <- aggregate(rbind(x[x$li_id %in% ref$li_id[ref$group == g_idx],]))
     
-    maintain_li <- x@data[x$VILLAGE_ID == ref$li_id[ref$group == g_idx & ref$merge_code == "1"],]
+    maintain_li <- x@data[x$li_id == ref$li_id[ref$group == g_idx & ref$merge_code == "1"],]
     
-    agg_map <- spChFIDs(agg_map, as.character(x$OBJECTID[x$VILLAGE_ID == ref$li_id[ref$group == g_idx & ref$merge_code == "1"]]))
+    agg_map <- spChFIDs(agg_map, as.character(x$OBJECTID[x$li_id == ref$li_id[ref$group == g_idx & ref$merge_code == "1"]]))
     
-    x <- x[!x$VILLAGE_ID %in% ref$li_id[ref$group == g_idx],]
+    x <- x[!x$li_id %in% ref$li_id[ref$group == g_idx],]
     
     x <- spChFIDs(x, as.character(x$OBJECTID))
     
@@ -920,14 +921,109 @@ fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
 
 li_fongshan <- read_xlsx("data/li_fongshan.xlsx", col_types = c("text"))
 
-fs_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2010")
+fs_ref_2010 <- liRef(li_fongshan, range = c("2010", "2014"), year = "2010")
 
-fs_2010_sum <- liSum(fongshan_2010, ref = fs_ref, cols = c(5:11), finish = TRUE)
+fs_ref_2014 <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
+
+fs_2014_sum <- liSum(fongshan_2014, ref = fs_ref_2014, cols = c(2:9), finish = TRUE)
+
+fs_2010_sum <- liSum(fongshan_2010, ref = fs_ref_2010, cols = c(5:11), finish = TRUE)
+
 
 fs_2010_rate <- liEqu(fongshan_2010, ref = fs_ref, result = "DDP_rate_2010", equ = c("DPP_2010 / vaild_vote_2010"))
 
 fs_2010_rate <- liEqu(fs_2010_rate, ref = fs_ref, result = "KMT_rate_2010", equ = c("(KMT_2010 + Other_2010) / vaild_vote_2010"), finish = TRUE)
 
+compare_test <- fs_2010_sum %>%
+  full_join(fs_2014_sum, by = "li_id")
+3
+fs_map <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
+
+plot(fs_map)
+
+kh_map <- shapefile("data/Kaohsiung/VillageKH_NLSC_1041007.shp")
+
+fs_map <- kh_map[kh_map$TOWN_ID == "6401200",]
+
+
+
+fs_map <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
+
+colnames(fs_map@data)[6] <- "li_id"
+
+fs_map_df <- fortify(fs_map, region = "li_id")
+
+fs_map_df$merge[fs_map_df$id == c("6401200-045")] <- "1"
+fs_map_df$merge[fs_map_df$id == c("6401200-062")] <- "2"
+
+map <- ggplot(data = fs_map_df, aes(x = long, y = lat, group = group))
+
+map + geom_path(color = "white") +
+  ggtitle("高雄市鳳山區圖資整併前") +
+  geom_polygon(aes(fill = merge)) +
+  coord_fixed(1.3) +
+  coord_equal() +
+  scale_fill_discrete(name = NULL,
+                      labels = c("生明里","誠智里","其它")) +
+  theme(text = element_text(family = "Heiti TC Medium"),
+        plot.background=element_rect(fill="white", colour=NA),
+        aspect.ratio = 1) +
+  xlab(NULL) + ylab(NULL)
+
+ggsave(filename = "fs.png", width = 4, 
+       dpi = 200, plot = last_plot(), device='png'
+)
+
+fs_map_adjust <- liShp(fs_map, fs_ref_2014)
+
+fs_map_ad_df <- fortify(fs_map_adjust, region = "li_id")
+
+#fs_map_df <- merge(fs_map_df, fs_ref_2014, by.x = "id", by.y = "li_id", all.x = TRUE)
+
+fs_map_ad_df$merge[fs_map_ad_df$id == c("6401200-045")] <- "1"
+fs_map_ad_df$merge[fs_map_ad_df$id == c("6401200-062")] <- "2"
+
+map_ad <- ggplot(data = fs_map_ad_df, aes(x = long, y = lat, group = group))
+
+map_ad + geom_path(color = "white") +
+  ggtitle("高雄市鳳山區圖資整併後") +
+  geom_polygon(aes(fill = merge)) +
+  coord_fixed(1.3) +
+  coord_equal() +
+  scale_fill_discrete(name = NULL,
+                      labels = c("生明里","其它")) +
+  theme(text = element_text(family = "Heiti TC Medium"),
+        plot.background=element_rect(fill="white", colour=NA),
+        aspect.ratio = 1) +
+  xlab(NULL) + ylab(NULL)
+
+ggsave(filename = "fs_a.png", width = 4, 
+       dpi = 200, plot = last_plot(), device='png'
+)
+
+  with(centroids, annotate(geom="text", x = clong, y = clat, label = centroids$name, size = 2))
+  
+  
+
++
+  geom_text(data=centroids, aes(fontface=2 ,centroids$clong, centroids$clat , label = name), 
+            color= "black" ,size=3, check_overlap = T, position=position_jitter(width=3, height=3)) 
+  
+  
+  
+  guides(fill = guide_legend(order = 1))
+  
+  
+  
++
+
+
+
+shapefile(fs_map, "data/map_adjusted/fongshan/fs_map.shp", overwrite = TRUE)
+
+write.dbf(fs_map@data, "data/map_adjusted/fongshan/fs_map.dbf")
+
+map_encoding <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
 
 ####end
 
