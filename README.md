@@ -81,7 +81,7 @@ install_github("torrentpien/twli")
 
  3. 非必要欄位：  
   
-  *  可在各年度執行村里整併之村里代碼前放進其他欄位，台灣村里整併表範例（li_table.xlsx）即按照下列欄位編制：
+  *  可在各年度執行村里整併之村里代碼前放進其他欄位，本文最後範例提供的高雄市鳳山區村里整併紀錄檔案（li_fongshan.xlsx）即按照下列欄位編制：
 
 | city_code | city_name | district_code | district_name | li_id | li_name | li_id_dgb | 2014 | mode_2014 | 2018 | mode_2018 |
 |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |    :---:    |
