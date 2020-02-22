@@ -5,7 +5,7 @@
 
 版本：0.1
 
-管理者：卞中佩（Chung-pei Pien）
+開發者：卞中佩（Chung-pei Pien）
 
 E-mail：torrent@rsprc.ntu.edu.tw
 
@@ -138,7 +138,7 @@ install_github("torrentpien/twli")
 
     *  **x**: 格式為dataframe，為R讀入的「台灣村里整併紀錄檔案」，檔案中必須有li_id欄位，year及mode_year欄位必須置於表格後段。
 
-    *  **range**: 設定研究時間範圍，例如研究範圍為2005-2010，year_range = c("2005", "2010")。
+    *  **range**: 設定研究時間範圍，例如研究範圍為2005-2010，range = c("2005", "2010")。
 
     *  **year**: 「所需整併村里資料檔」的時間，單位為「年」。
 
@@ -190,7 +190,7 @@ install_github("torrentpien/twli")
 
 ### 範例：高雄市鳳山區2010、2014年市長選舉資料村里整併
 
-範例檔案請至[data下載](https://github.com/torrentpien/twli/tree/master/data)
+範例資料檔案請至[data下載](https://github.com/torrentpien/twli/tree/master/data)
 
 高雄市鳳山區2014年做了兩組村里整併：
 
