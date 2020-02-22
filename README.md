@@ -180,7 +180,7 @@
 
 ### 範例：高雄市鳳山區2010、2014年市長選舉資料村里整併
 
-範例檔案請至[data下載](https://github.com/torrentpien/twli/tree/master/data)
+範例檔案請至[data下載](https://github.com/torrentpien/twli_code/tree/master/data)
 
 高雄市鳳山區2014年做了兩組村里整併：
 
@@ -223,6 +223,8 @@ fs_2014_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
 
 **大家可以看到兩個年度產生的「村里整併參照表」不太一樣。**
 
+**liRef透過所輸入的時間範圍及檔案時間，計算當年度應該要整併的村里，並產生「村里整併參照表」。**
+
 **fs_2010_ref**：由於2014年進行村里整併，2010年仍處於各自獨立的村里要進行整併。
 
 <p align="center"> 
@@ -230,8 +232,6 @@ fs_2014_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
 </p>
 
 **fs_2014_ref**：為什麼2014年整併的村里有一組仍需要在2014年進行整併，另一組則不用？主要是2014年誠正里被合併進併入生明里、誠智里，我們無法知道到底誠正里哪些居民被劃進生明里、誠智里，所以2010年是誠正里、生明里、誠智里三個村里進行整併，並且保留生明里，刪除誠正里、誠智里。而到了2014年，也必須對生明里、誠智里進行整併。
-
-**liRef透過所輸入的時間範圍及檔案時間，計算當年度應該要整併的村里，並產生「村里整併參照表」。**
 
 <p align="center"> 
 <img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_ref_2014_fit.png?raw=true">
