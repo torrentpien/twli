@@ -307,7 +307,7 @@ fs_map <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
 fs_map_adjusted <- liShp(fs_map, ref = fs_2014_ref)
 ```
 
-**生明里合併了誠智里，高雄鳳山區的村里圖資與村里一致。**
+**生明里合併了誠智里，高雄鳳山區的村里圖資與其他村里資料觀測值一致。**
 
 <p align="center"> 
 <img src="https://github.com/torrentpien/twli/blob/master/images/fs_a.png?raw=true">
