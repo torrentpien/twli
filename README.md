@@ -205,7 +205,6 @@ install_github("torrentpien/twli")
 ```
 fongshan_2010 <- read.csv("data/fongshan_2010.csv", stringsAsFactors = FALSE)
 fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
-
 ```
 
 鳳山區2010年的村里數是78個，2014年的村里數是76個，2014年少了兩個里，也就是被整併的海風里、誠正里。
