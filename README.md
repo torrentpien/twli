@@ -332,4 +332,6 @@ write.dbf(fs_map_adjusted@data, "fs_map.dbf")
   *  2020.2.13
      *  0.01: 開發中
 
+### 授權說明：
 
+本項目採用MIT開源授權，完整的授權說明已經放置在[LICENSE](LICENSE)文件中。
