@@ -17,7 +17,7 @@
 #### 1. 處理流程：
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/%E7%A4%BA%E6%84%8F%E5%9C%96.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/%E7%A4%BA%E6%84%8F%E5%9C%96.png?raw=true">
 </p>
 
   台灣里套件目前初步開發四個函數，分別為liRef、liSum、liEqu、liShp，四個函數的功能及與所需整併資料的關係如下：
@@ -201,7 +201,7 @@ fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
 鳳山區2010年的村里數是78個，2014年的村里數是76個，2014年少了兩個里，也就是被整併的海風里、誠正里。
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs_data.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_data.png?raw=true">
 </p>
 
   *  要分析高雄市鳳山區2010、2014年的資料，必須對鳳山區這兩年度的資料進行處理。
@@ -211,7 +211,6 @@ fongshan_2014 <- read.csv("data/fongshan_2014.csv", stringsAsFactors = FALSE)
 
 ```
 li_fongshan <- read_xlsx("data/li_fongshan.xlsx", col_types = c("text"))
-
 ```
 
 #### 第二步：liRef函數輸入分析時間範圍及需要處理的年度，產生各年度的「村里整併參照表」
@@ -227,7 +226,7 @@ fs_2014_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
 **fs_2010_ref**：由於2014年進行村里整併，2010年仍處於各自獨立的村里要進行整併。
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs_ref_2010.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_ref_2010.png?raw=true">
 </p>
 
 **fs_2014_ref**：為什麼2014年整併的村里有一組仍需要在2014年進行整併，另一組則不用？主要是2014年誠正里被合併進併入生明里、誠智里，我們無法知道到底誠正里哪些居民被劃進生明里、誠智里，所以2010年是誠正里、生明里、誠智里三個村里進行整併，並且保留生明里，刪除誠正里、誠智里。而到了2014年，也必須對生明里、誠智里進行整併。
@@ -235,7 +234,7 @@ fs_2014_ref <- liRef(li_fongshan, range = c("2010", "2014"), year = "2014")
 **liRef透過所輸入的時間範圍及檔案時間，計算當年度應該要整併的村里，並產生「村里整併參照表」。**
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs_ref_2014_fit.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_ref_2014_fit.png?raw=true">
 </p>
 
 #### 第三步：以liSum對2010、2014年高雄市鳳山區選舉資料進行加總
@@ -249,7 +248,7 @@ fs_2014_sum <- liSum(fongshan_2014, ref = fs_2014_ref, cols = c(2:9), finish = T
 fs_2010_sum、fs_2014_sum兩個年度整併後村里資料都變成75里。
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs_sum.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_sum.png?raw=true">
 </p>
 
 #### 第四步：以liEqu對2010、2014年高雄市鳳山區選舉資料進行民進黨、國民黨的得票率計算
@@ -287,7 +286,7 @@ fs_map <- shapefile("data/map_adjusted/fongshan/fs_map.shp")
 **生明里、誠智里為兩個里。**
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs.png?raw=true">
 </p>
 
 先前的liSum、liEqu已經把2014年的資料，生明里、誠智里合併後，刪除誠智里，把合併後的資料併入圖資，誠智里會沒有資料。
@@ -301,7 +300,7 @@ fs_map_adjusted <- liShp(fs_map, ref = fs_2014_ref)
 **生明里合併了誠智里，高雄鳳山區的村里圖資與村里一致。**
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/twli/blob/master/images/fs_a.png?raw=true">
+<img src="https://github.com/torrentpien/twli_code/blob/master/images/fs_a.png?raw=true">
 </p>
 
 另外，將R處理完的圖資存檔後，中文會出現亂碼，解決方案為：
