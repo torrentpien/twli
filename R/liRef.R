@@ -6,8 +6,8 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
 
   range <- unique(c(range[1],  record_year[record_year %in% range], range[length(range)]))
 
-  merge_temp <- dplyr::select(x, c(1:7), contains(range))
-
+  merge_temp <- dplyr::select(x, c(1:7), dplyr::matches(paste(range, collapse = "|")))
+  
   merge_year <- intersect(record_year, range)
 
   merge_temp <- merge_temp[rowSums(is.na(merge_temp[, merge_year])) != length(merge_year),]
