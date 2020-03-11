@@ -181,6 +181,8 @@ liRef <- function(x, range, year, vbox = FALSE, done = TRUE) {
       filter(mode != "vbox")
 
   }
+  
+  chk_row <- distinct(chk_row)
 
   merge_list <- list()
 
