@@ -17,7 +17,7 @@ liEqu <- function(x, ref, result, equ, finish = FALSE) {
   mg_target <- mg_target %>%
     dplyr::left_join(ref[ref$merge_code == "1",], by = "group")
 
-  x[match(mg_target$li_id, x$li_id), c(col_spl, result)] <- mg_target[, c(col_spl, result)]
+  x[match(mg_target$li_id, x$li_id), c(result)] <- mg_target[, c(result)]
 
   if (finish == TRUE) {
 
