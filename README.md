@@ -7,9 +7,9 @@
 
 開發者：卞中佩（Chung-pei Pien）
 
-E-mail：torrent@rsprc.ntu.edu.tw
+E-mail：torrent@nccu.edu.tw
 
-機構：台灣大學風險社會與政策研究中心
+機構：政治大學創新國際學院
 
 ### 簡介：
 
